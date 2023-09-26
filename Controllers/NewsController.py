@@ -24,39 +24,48 @@ def deleteById(id):
     if resultado.deleted_count == 1:
         return Response(json.dumps(noticia, default=str), mimetype="application/json")
     else:
-        resposta = jsonify({'erro': 'Notícia não encontrada.'})
-        resposta.status_code = 404  # HTTP 400 (Bad Request)
-        return resposta
+        return makeErrorResponse(404,"Notícia não encontrada")
 
 @app.route('/noticias/<string:id>', methods=['PUT',])
 def updateById(id):
-    if 'titulo' not in request.form or 'conteudo' not in request.form:
-        resposta = jsonify({'erro': 'Título e conteúdo são campos obrigatórios.'})
-        resposta.status_code = 400  # HTTP 400 (Bad Request)
-        return resposta
-    titulo = request.form['titulo']
-    conteudo = request.form['conteudo']
+    if not validateRequest(request):
+        return makeErrorResponse(400, "Título e conteúdo são campos obrigatórios")
+
+    titulo, conteudo = extractRequest(request)
     result = dao.update(id,titulo,conteudo)
+
     if result.modified_count == 1:
         return Response(json.dumps(dao.getById(id), default=str), mimetype="application/json")
     else:
-        resposta = jsonify({'erro': 'Notícia não encontrada.'})
-        resposta.status_code = 404  # HTTP 400 (Bad Request)
-        return resposta
+        return makeErrorResponse(404,"Notícia não encontrada")
 
 @app.route('/noticias/criar', methods=['POST',])
 def save():
-    if 'titulo' not in request.form or 'conteudo' not in request.form:
-        resposta = jsonify({'erro': 'Título e conteúdo são campos obrigatórios.'})
-        resposta.status_code = 400  # HTTP 400 (Bad Request)
-        return resposta
+    if not validateRequest(request):
+        return makeErrorResponse(400, "Título e conteúdo são campos obrigatórios")
 
-    titulo = request.form['titulo']
-    conteudo = request.form['conteudo']
+    titulo, conteudo = extractRequest(request)
     data_publicacao = datetime.datetime.today()
     noticia = Noticia(titulo,conteudo,data_publicacao)
 
     id = dao.save(noticia)
     resposta = make_response('', 201)
-    resposta.headers['Location'] = "/noticias/"+id
+    resposta.headers['Location'] = "noticias/"+id
     return resposta
+
+def validateRequest(req):
+    if 'titulo' not in req.form or 'conteudo' not in req.form:
+        return False
+    return True
+
+def makeErrorResponse(code=400,msg=""):
+    resposta = jsonify({'erro': msg})
+    resposta.status_code = code
+    return resposta
+
+def extractRequest(req):
+    if not validateRequest(req):
+        return ("","")
+    titulo = request.form['titulo']
+    conteudo = request.form['conteudo']
+    return (titulo, conteudo)
