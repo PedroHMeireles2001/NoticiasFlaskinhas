@@ -8,7 +8,7 @@ from Controllers.NewsController import *
 
 def run_app():
     CORS(app)
-    app.run(port=os.environ["port"])
+    app.run(port=int(os.environ["port"]))
 
 if __name__ == '__main__':
     run_app()
