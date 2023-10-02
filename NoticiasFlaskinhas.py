@@ -1,3 +1,4 @@
+import os
 import flask
 from flask import Flask
 from flask_cors import CORS
@@ -7,7 +8,7 @@ from Controllers.NewsController import *
 
 def run_app():
     CORS(app)
-    app.run(debug=True)
+    app.run(port=os.environ["port"])
 
 if __name__ == '__main__':
     run_app()
