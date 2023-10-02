@@ -1,0 +1,24 @@
+version: '3.9'
+services:
+  mongodb:
+    image: mongo:4.4.6
+    container_name: meu-mongo
+    networks:
+      - compose-network
+  noticias:
+    image: pedro/noticiasflaskinhas:1.0
+    container_name: noticias-flaskinhas
+    networks:
+      - compose-network
+    ports:
+      - 5000:5000
+  react:
+    image: pedro/noticiasflaskinhas-react:1.0
+    container_name: noticias-flaskinhas-react
+    networks:
+      - compose-network
+    ports:
+      - 3000:3000
+networks:
+  compose-network:
+    driver: bridge
